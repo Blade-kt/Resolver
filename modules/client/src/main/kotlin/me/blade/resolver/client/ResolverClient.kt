@@ -1,8 +1,8 @@
 package me.blade.resolver.client
 
-import me.blade.resolver.client.graphics.DisplayMode
+import me.blade.resolver.client.graphics.window.DisplayMode
 import me.blade.resolver.client.graphics.RenderMain
-import me.blade.resolver.client.graphics.Window
+import me.blade.resolver.client.graphics.window.Window
 import org.lwjgl.glfw.GLFW.*
 
 object ResolverClient {

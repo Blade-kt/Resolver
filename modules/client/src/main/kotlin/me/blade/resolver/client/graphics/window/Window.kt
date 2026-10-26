@@ -1,12 +1,15 @@
-package me.blade.resolver.client.graphics
+package me.blade.resolver.client.graphics.window
 
+import me.blade.resolver.client.events.WindowEvent
 import me.blade.resolver.shared.GameConstants
+import me.blade.resolver.shared.event.EventBus
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL
 import kotlin.properties.Delegates
 
 class Window {
     private var handle by Delegates.notNull<Long>()
+    val eventBus = EventBus()
 
     fun initialize() {
         check(glfwInit()) {

@@ -1,4 +1,4 @@
-package me.blade.resolver.client.graphics
+package me.blade.resolver.client.graphics.window
 
 enum class DisplayMode {
     Windowed,
