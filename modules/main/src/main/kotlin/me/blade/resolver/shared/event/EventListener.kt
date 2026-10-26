@@ -1,24 +1,24 @@
 package me.blade.resolver.shared.event
 
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentSkipListSet
 import kotlin.jvm.java
 
-class EventListener {
-    val eventMap = ConcurrentHashMap<Class<out Event>, ConcurrentSkipListSet<(Event) -> Unit>>()
+class EventListener <E: Event> {
+    val eventMap = hashMapOf<Class<out E>, MutableSet<EventCallback>>()
 
-    fun <T: Event> post(event: T) {
+    inline fun <reified C: Any, T: E> post(context: C, event: T) {
         eventMap[event.javaClass]?.forEach {
-            it(event)
+            if (it.contextClass != null && !C::class.java.isAssignableFrom(it.contextClass)) return@forEach
+            it.function(context, event)
         }
     }
 
-    inline fun <reified T: Event> register(noinline callback: (T) -> Unit) {
-        val container = eventMap.getOrPut(T::class.java) {
-            ConcurrentSkipListSet<(Event) -> Unit>()
-        }
+    inline fun <reified C: Any, reified T: E> register(noinline callback: C.(T) -> Unit) {
+        val container = eventMap.getOrPut(T::class.java) { mutableSetOf() }
 
-        @Suppress("UNCHECKED_CAST")
-        container.add(callback as ((Event) -> Unit)?)
+        container.add(EventCallback(
+            contextClass = C::class.java,
+        ) { event ->
+            callback.invoke(this as C, event as T)
+        })
     }
 }

@@ -12,7 +12,7 @@ object ResolverClient {
     fun main(args: Array<String>) {
         window.initialize()
 
-        window.setDisplayMode(DisplayMode.Fullscreen)
+        window.setDisplayMode(DisplayMode.Windowed)
         window.setAttrib(GLFW_VISIBLE, GLFW_TRUE)
 
         while (!window.shouldClose()) {

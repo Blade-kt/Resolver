@@ -1,3 +1,8 @@
 package me.blade.resolver.shared.event
 
-class EventCallback <T : Event>(val runnable: (T) -> Unit)
+import javax.naming.event.EventContext
+
+class EventCallback(
+    val contextClass: Class<out Any>?,
+    val function: EventContext.(Event) -> Unit
+)
