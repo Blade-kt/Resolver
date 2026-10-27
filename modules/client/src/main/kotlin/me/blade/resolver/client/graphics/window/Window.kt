@@ -3,31 +3,37 @@ package me.blade.resolver.client.graphics.window
 import me.blade.resolver.client.events.WindowEvent
 import me.blade.resolver.shared.GameConstants
 import me.blade.resolver.shared.event.EventBus
+import me.blade.resolver.shared.logger.Logger
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.glfw.GLFWDropCallback
 import org.lwjgl.opengl.GL
+import kotlin.math.log
 import kotlin.properties.Delegates
 
 class Window {
     private var handle by Delegates.notNull<Long>()
+    private val logger = Logger("Window")
+
     val eventBus = EventBus<WindowEvent>()
 
-    fun initialize() {
+    init {
+        logger.log(Logger.Level.Info, "glfwInit")
         check(glfwInit()) {
             "Unable to initialize GLFW"
         }
 
-        val monitor = glfwGetPrimaryMonitor()
-        val videoMode = glfwGetVideoMode(monitor) ?: throw IllegalStateException("Unable to get video mode")
-        val (width, height) = videoMode.width() to videoMode.height()
-
         glfwWindowHint(GLFW_VERSION_MAJOR, GL_VERSION.first)
         glfwWindowHint(GLFW_VERSION_MAJOR, GL_VERSION.second)
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE)
-        handle = glfwCreateWindow(width / 2, height / 2, GameConstants.name, 0L, 0L)
+
+        logger.log(Logger.Level.Info, "glfwCreateWindow")
+        handle = glfwCreateWindow(1, 1, GameConstants.name, 0L, 0L)
+
+        logger.log(Logger.Level.Info, "Initializing GL ${GL_VERSION.first}.${GL_VERSION.second} context")
         glfwMakeContextCurrent(handle)
         GL.createCapabilities()
 
+        logger.log(Logger.Level.Info, "glfwSet*Callback")
         glfwSetKeyCallback(handle) { _, key, sc, action, mods ->
             eventBus.post(WindowEvent.Key(key, sc, action, mods))
         }
@@ -101,24 +107,28 @@ class Window {
         when (key) {
             GLFW_VISIBLE -> {
                 if (value == GLFW_TRUE) {
+                    logger.log(Logger.Level.Debug, "glfwShowWindow")
                     glfwShowWindow(handle)
                 } else {
+                    logger.log(Logger.Level.Debug, "glfwHideWindow")
                     glfwHideWindow(handle)
                 }
             }
             else -> {
+                logger.log(Logger.Level.Debug, "WindowsetAttrib($key, $value)")
                 glfwSetWindowAttrib(handle, key, value)
             }
         }
     }
 
     fun setDisplayMode(mode: DisplayMode) {
+        logger.log(Logger.Level.Debug, "setDisplayMode(${mode.name})")
         val monitor = glfwGetPrimaryMonitor()
         val videoMode = glfwGetVideoMode(monitor) ?: throw IllegalStateException("Unable to get video mode")
 
         when (mode) {
             DisplayMode.Windowed -> {
-                val desiredSize = (videoMode.width() / 2) to (videoMode.height() / 2)
+                val desiredSize = (videoMode.width() / 1.5).toInt() to (videoMode.height() / 1.5).toInt()
 
                 glfwSetWindowMonitor(
                     handle,
@@ -138,6 +148,7 @@ class Window {
     }
 
     fun terminate() {
+        logger.log(Logger.Level.Info, "terminate")
         glfwDestroyWindow(handle)
         glfwTerminate()
     }
